@@ -25,24 +25,30 @@ var resources = [
   {name:"blah3",      src:"media/Andy/10"   + audioFileType, img:"media/Andy/10.jpg" }
 ];
 
-var player = document.createElement("img");
-document.body.appendChild(player);
+var player = $("#player");
+var list = player.find("ul")
+var img = document.createElement("img");
+
+player.prepend(img);
+
 var resounceCount = resources.length;
 var tempCount = 0;
 
 var playSounds = function() {
+	
   if (tempCount >= resounceCount) { console.log("all sounds finished"); return; }
-  var n = tempCount++;
-  soundManager.play(resources[n].name,{onfinish:playSounds});
-  player.src = resources[n].img.src;
+
+  var resource = resources[tempCount++];
+
+  soundManager.play(resource.name,{onfinish:playSounds});
+  img.src = resource.img.src;
+
+	resource.listItem.addClass("on");
 };
  
 soundManager.flashVersion = 9; // optional: shiny features (default = 8)
 soundManager.useHTML5Audio = true;
-/*
- * read up on HTML5 audio support, if you're feeling adventurous.
- * iPad/iPhone and devices without flash installed will always attempt to use it.
-*/
+
 soundManager.onready(function() {
   
   var loader = new PxLoader(); 
@@ -50,12 +56,13 @@ soundManager.onready(function() {
   resources.map(function(resource){
     resource.src = loader.addSound(resource.name, resource.src);
     resource.img = loader.addImage(resource.img);
+		
+		resource.listItem = $("<li>").append(resource.img).stop().appendTo(list);
+		
   });
-  
-  console.log(resources)
 
   loader.addProgressListener(function(e) { 
-
+		//console.log(arguments)
   });
 
   // callback that will be run once images are ready 
@@ -68,5 +75,6 @@ soundManager.onready(function() {
   // begin downloading images 
   loader.start();
   // Ready to use; soundManager.createSound() etc. can now be called.
+
 });
  

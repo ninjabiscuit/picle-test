@@ -1,0 +1,21 @@
+.player {
+	width:612px;
+	height:662px;
+}
+
+.roll {
+	height:50px;
+	margin:0;
+	padding:0;
+}
+
+.roll li, .roll img {
+	width:50px;
+	height:50px;
+	float:left;
+}
+
+.roll li {
+	padding:0;
+	ist-style:none;
+}
