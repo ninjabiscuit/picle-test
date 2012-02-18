@@ -53,7 +53,7 @@ var m = Math,
 			i;
 
 		that.wrapper = typeof el == 'object' ? el : doc.getElementById(el);
-		that.wrapper.style.overflow = 'hidden';
+		//that.wrapper.style.overflow = 'hidden';
 		that.scroller = that.wrapper.children[0];
 
 		// Default options
@@ -416,7 +416,7 @@ iScroll.prototype = {
 		if (resetX == that.x && resetY == that.y) {
 			if (that.moved) {
 				that.moved = false;
-				if (that.options.onScrollEnd) that.options.onScrollEnd.call(that);		// Execute custom code on scroll end
+				if (that.options.onScrollEnd) that.options.onScrollEnd.call(that, that.currPageX);		// Execute custom code on scroll end
 			}
 
 			return;
@@ -670,7 +670,8 @@ iScroll.prototype = {
 		that.minScrollY = -that.options.topOffset || 0;
 		that.scrollerW = mround(that.scroller.offsetWidth);
 		that.scrollerH = mround(that.scroller.offsetHeight + that.minScrollY);
-		that.maxScrollX = that.wrapperW - that.scrollerW;
+		//that.maxScrollX = that.wrapperW - that.scrollerW;
+		that.maxScrollX = that.scrollerW * -1;
 		that.maxScrollY = that.wrapperH - that.scrollerH + that.minScrollY;
 		that.dirX = 0;
 		that.dirY = 0;

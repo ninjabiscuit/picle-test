@@ -11,64 +11,173 @@ if (!PICLE) {
 
 	Player.fn = Player.prototype = {
 		
-		init : function(resources) {
+		init : function(playerElem, resources) {
 			
 			if(!resources) { return; }
 			
 			this.img = document.createElement("img");
 			this.rollHolder = document.getElementById("rollHolder");
 			
-			var container = $("#player").prepend(this.img);
+			playerElem.prepend(this.img);
 			
-			var list = this.list = container.find("ul")[0];
+			var list = this.list = playerElem.find("ul")[0];
+			
+			this.createUI(playerElem);
 			
 			this.listWidth = 0;
 			this.itemWidth = 50;
 			
-			this.resounceCount = resources.length;
+			this.resourceCount = resources.length;
 			this.tempCount = 0;
 			this.previousItem = null;
 			this.position = 0;
 			this.resources = resources;
+			this.isPaused = false;
 			
 			this.page = 0;
 			
-			this.gesturing = false;
-
-		},
-		
-		handleEvent : function(e) {
-			this[e.type](e);
-		},
-		
-		playSounds : function() {
+			this.gesturing = false;			
 			
-		  if (this.tempCount >= this.resounceCount) { console.log("all sounds finished"); return; }
+			this.spinner = new Spinner({
+			  lines: 12, // The number of lines to draw
+			  length: 7, // The length of each line
+			  width: 4, // The line thickness
+			  radius: 10, // The radius of the inner circle
+			  color: '#000', // #rgb or #rrggbb
+			  speed: 1, // Rounds per second
+			  trail: 60, // Afterglow percentage
+			  shadow: false, // Whether to render a shadow
+			  hwaccel: false // Whether to use hardware acceleration
+			}).spin(playerElem[0]);
 			
-			var previousItem = this.previousItem,
-					resource = this.previousItem = this.resources[this.tempCount++];
-
-			if (previousItem) {
-				previousItem.listItem.removeClass("active");
-				//this.move( this.list, this.position -= this.itemWidth );
+			if (soundManager.readyState === 3) {
+				this.playerReadyCallback();
 			} else {
-				this.scroller = new iScroll(this.rollHolder, { vScroll : false, snap: 'li', momentum: false });
+				soundManager.onready($.proxy(this.playerReadyCallback, this));
 			}
 			
-		  soundManager.play(resource.name, { onfinish : $.proxy( this.playSounds, this ) });
-		  
-			this.img.src = resource.img.src;
+			playerElem = null;
+		},
+		
+		destroy : function() {
+			soundManager.stopAll();
+			soundManager.reboot();
+			this.scroller.destroy();
+			this.pauseBtn.off("click").remove();
+			$(document).off("keydown");
+		},
+		
+		createUI : function(container) {
+			
+			this.pauseBtn = $("<a>", {
+				text : "pause",
+				"class" : "playPause"	
+			}).on("click", $.proxy(function(e){
+				if (this.isPaused) {
+					this.play();
+				} else {
+					this.pause();
+				}
+				e.preventDefault();
+			}, this)).prependTo(container);
 
-			resource.listItem.addClass("active");
+			container = null;
+		},
+		
+		pause : function() {
+			if (this.isPaused) { return; }
+			this.isPaused = true;
+			this.pauseBtn.addClass("paused");
+			this.pauseBtn.text("play");
+			soundManager.stopAll();
+		},
+		
+		play : function(i) {
+			if (!this.isPaused) { return; }
+			this.isPaused = false;
+			this.pauseBtn.removeClass("paused");
+			this.pauseBtn.text("pause");
+			this.playSounds((i === undefined) ? this.scrollPageIndex : i);
+		},
+		
+		/*
+		handleEvent : function(e) {
+			console.log(e);
+			this[e.type](e);
+		},
+		*/
+		
+		startScroller : function(i) {
+			// instantiate scroller
+			this.scroller = new iScroll(this.rollHolder, { 
+				vScroll : false, 
+				snap: 'li', 
+				momentum: false, 
+				onScrollMove : $.proxy(function(){
+					this.pause();
+				}, this), 
+				onScrollEnd : $.proxy(function(i) {
+					this.isPaused && this.play(i);
+				}, this)
+			});
+			
+			i && this.scroller.scrollToPage(i, 0);
+			
+			// enable keyboard interactions with the left and right keys
+			$(document).on("keydown", $.proxy(function(e){
+				if (e.keyCode == 37) { 
+					this.scrollMove(this.scrollPageIndex -= 1);
+					e.preventDefault();
+				} else if (e.keyCode == 39) { 
+					this.scrollMove(this.scrollPageIndex += 1);
+					e.preventDefault();
+				}
+			}, this));
+		},
+		
+		scrollMove : function(i) {
+			this.pause();
+			this.scroller.scrollToPage(i, 0);
+		},
+		
+		playSounds : function(i) {
+			
+			// continue in sequence or start from the index provided
+			this.tempCount = (i === undefined) ? this.tempCount : i;
+			
+			// if less than 0, play from zero
+			this.tempCount = (this.tempCount < 0) ? 0 : this.tempCount;
+			
+			// There are no more sounds to play
+		  if (this.tempCount >= this.resourceCount) { console.log("all sounds finished"); return; }
+			
+			// if no scroller, set it up for the first time, else if we're not already there, scroll to the correct page
+			if (!this.scroller) {
+				this.startScroller(this.tempCount);
+			} else if (this.scrollPageIndex !== this.tempCount) {
+				this.scroller.scrollToPage(this.tempCount, 0);
+			}
+			
+			// set scroll index so we know where to scroll to an from
+			this.scrollPageIndex = this.tempCount;
+			
+			var resource = this.resources[this.tempCount++];
+			soundManager.setPosition(resource.name,0);
+		  soundManager.play(resource.name, { onfinish : $.proxy( this.playSounds, this ) });
+			this.img.src = resource.img.src;
 			
 		},
 		
-		smReadyCallback : function() {
+		playerReadyCallback : function() {
 			
 			var loader = this.loader = new PxLoader();
 			
-			loader.addCompletionListener($.proxy(this.playSounds, this));
-			//loader.addProgressListener($.proxy(this.loaderProgressListener, this));
+			loader.addCompletionListener($.proxy(function(){
+				
+				this.spinner.stop();
+				this.playSounds();
+				
+			}, this));
 
 			$.map(this.resources, $.proxy(function(resource){
 				
@@ -85,45 +194,28 @@ if (!PICLE) {
 			// begin downloading images and sounds
 		  loader.start();
 		
-		},
-		
-		loaderProgressListener : function(e) {}
+		}
 		
 	};
 	
 	if (Modernizr.audio) {
-
-	  Player.fn.audioFileType =   Modernizr.audio.ogg ? '.ogg' :
-	                        			Modernizr.audio.mp3 ? '.mp3' :
-	                                              			'.m4a';
-
+		
+		Player.fn.audioFileType = '.mp3';
+		
+		for (var audioFileType in Modernizr.audio) {
+			if (Modernizr.audio[audioFileType] === "probably" && audioFileType !== "wav") {
+				Player.fn.audioFileType = "." + audioFileType;
+				soundManager.useHTML5Audio = true;
+			}
+		};
+		/*
+	  Player.fn.audioFileType = Modernizr.audio.ogg ? '.ogg' :
+	                        		Modernizr.audio.mp3 ? '.mp3' :
+	                                              		'.m4a';
+		*/
 	} else {
 	  alert("your browser isn't capable of playing HTML5 audio"); 
 	}
-	
-	// if ( Modernizr.csstransforms ) {
-	// 
-	// 		if (Modernizr.csstransforms3d) { 
-	// 
-	// 	    Player.fn.move = function ( el, position ) {
-	// 	      el.style[this.prefixTransform] = 'translate3d(' + position + 'px, 0, 0) ';
-	// 	    };
-	// 
-	// 		} else if (Modernizr.csstransforms3d) { 
-	// 
-	// 	    Player.fn.move = function ( el, position ) {
-	// 	      el.style[this.prefixTransform] = 'translate(' + position + 'px, 0) ';
-	// 	    };
-	// 
-	// 		}
-	// 
-	// 	} else {
-	// 
-	// 		Player.fn.move = function ( el, position ) {
-	// 	    el.style.left = position + 'px';
-	// 	  };
-	// 
-	// 	}
 	
 	PICLE.Player = Player;
 	
@@ -144,10 +236,8 @@ var resources = [
 
 var player = new PICLE.Player();
 
-player.init(resources);
+player.init($("#player"), resources);
  
 soundManager.flashVersion = 9; // optional: shiny features (default = 8)
 soundManager.useHTML5Audio = true;
 soundManager.debugMode = false;
-
-soundManager.onready($.proxy(player.smReadyCallback, player));

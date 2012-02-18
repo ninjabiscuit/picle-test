@@ -7,16 +7,30 @@
 
 .roll-holder {
 	position:relative;
-	right:0;
+	float:right;
 	width:331px;
 	height:50px;
+}
+
+.roll-holder:before {
+	width: 0;
+	height: 0;
+	border-left: 20px solid transparent;
+	border-right: 20px solid transparent;
+	border-top: 20px solid red;
+	display: block;
+	position: absolute;
+	top: -10px;
+	left: 5px;
+	content: "";
+	z-index: 5;
 }
 
 .roll {
 	height:50px;
 	margin:0;
 	padding:0;
-	
+/*
 	-webkit-transition: -webkit-transform 150ms ease-in;
 	   -moz-transition: -moz-transform 	  150ms ease-in;
 	    -ms-transition: -ms-transform 	  150ms ease-in;
@@ -34,43 +48,55 @@
 .roll img {
 	width:50px;
 	height:50px;
-	
-	-webkit-transition: -webkit-transform 200ms ease-out;
-	   -moz-transition: -moz-transform 		200ms ease-out;
-	    -ms-transition: -ms-transform 		200ms ease-out;
-	     -o-transition: -o-transform 			200ms ease-out;
-	        transition: transform 				200ms ease-out; /* transition-property transition-duration(ms/s) transition-timing-function(ease-out/ease/linear/ease-in-out/ease-in/cubic-bezier(0.42, 0, 1.0, 1.0)/step-start/steps(3)/steps(3,start)/step-end) transition-delay(+-ms/s) */	
 }
 
-.roll .active img {
-	-webkit-transition-timing-function: ease-in;
-	   -moz-transition-timing-function: ease-in;
-	    -ms-transition-timing-function: ease-in;
-	     -o-transition-timing-function: ease-in;
-	        transition-timing-function: ease-in;
+.playPause {
+	width: 40px;
+	height: 40px;
+	display: block;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin: -20px 0 0 -20px;
+	background: red;
+	border-radius: 20px;
+	text-align: center;
+	line-height: 40px;
+	opacity:0;
+	
+	-webkit-user-seect: none;
+	-moz-user-select: none;
+  -khtml-user-select: none;
+	-o-user-seect: none;
+	
+	cursor:pointer;
+	
+	-webkit-transition: opacity 250ms ease-in 1s;
+	   -moz-transition: opacity 250ms ease-in 1s;
+	    -ms-transition: opacity 250ms ease-in 1s;
+	     -o-transition: opacity 250ms ease-in 1s;
+	        transition: opacity 250ms ease-in 1s; /* transition-property transition-duration(ms/s) transition-timing-function(ease-out/ease/linear/ease-in-out/ease-in/cubic-bezier(0.42, 0, 1.0, 1.0)/step-start/steps(3)/steps(3,start)/step-end) transition-delay(+-ms/s) */
+	
+	
+  user-select: none;
 }
 
-.csstransforms .roll .active img {
-
-	-webkit-transform: scale(1.5);
-	   -moz-transform: scale(1.5);
-	    -ms-transform: scale(1.5);
-	     -o-transform: scale(1.5);
-	        transform: scale(1.5);
-	
+.paused {
+	background: green;
 }
 
-.csstransforms3d .roll .active img {
-
-	-webkit-transform: scale3d(1.5, 1.5, 1);
-	   -moz-transform: scale3d(1.5, 1.5, 1);
-	    -ms-transform: scale3d(1.5, 1.5, 1);
-	     -o-transform: scale3d(1.5, 1.5, 1);
-	        transform: scale3d(1.5, 1.5, 1);
+.player:hover .playPause, .paused {
+	opacity:1;
 	
+	-webkit-transition-delay: 0s;
+	   -moz-transition-delay: 0s;
+	    -ms-transition-delay: 0s;
+	     -o-transition-delay: 0s;
+	        transition-delay: 0s;
 }
 
 .roll li {
 	padding:0;
 	list-style:none;
 }
+
