@@ -20,11 +20,30 @@
 <body class="" id="" data-action="index">
 	
 	<div id="player" class="player">
-		<div id="rollHolder" class="roll-holder">
-			<ul id="roll" class="roll">
-			
-			</ul>
-		</div>
+	  <img src="media/Andy/01.jpg" class="player-poster" />
+	  <a class="playPause">Play</a>
+	  <div class="player-bar">
+  		<div id="rollHolder" class="roll-holder">
+  			<ul id="roll" class="roll">
+  			  <li><img src="media/Andy/01.jpg"></li>
+    		  <li><img src="media/Andy/02.jpg"></li>
+    		  <li><img src="media/Andy/03.jpg"></li>
+    		  <li><img src="media/Andy/04.jpg"></li>
+    		  <li><img src="media/Andy/05.jpg"></li>
+    		  <li><img src="media/Andy/06.jpg"></li>
+    		  <li><img src="media/Andy/07.jpg"></li>
+    		  <li><img src="media/Andy/01.jpg"></li>
+    		  <li><img src="media/Andy/02.jpg"></li>
+    		  <li><img src="media/Andy/03.jpg"></li>
+    		  <li><img src="media/Andy/04.jpg"></li>
+    		  <li><img src="media/Andy/05.jpg"></li>
+    		  <li><img src="media/Andy/06.jpg"></li>
+    		  <li><img src="media/Andy/07.jpg"></li>
+    		  <li><img src="media/Andy/08.jpg"></li>
+    		  <li><img src="media/Andy/09.jpg"></li>
+  			</ul>
+  		</div>
+  	</div>
 	</div> 
 	<script src="jquery.js"></script>
   <script src="soundmanager2.js"></script>
@@ -34,6 +53,7 @@
 	<script src="iscroll.js"></script>
 	<script src="spin.js"></script>
   <script src="player.js"></script>
+  <script src="index.js"></script>
 	<script>
 		
 		// defaults for soundmanager
@@ -56,10 +76,10 @@
 		];
 		
 		// new player
-		var player = new PICLE.Player();
+		//var player = new PICLE.Player();
 		
 		// init player
-		player.init($("#player"), resources);
+		//player.init($("#player"), resources);
 		
 		// destroy player when done to free up memory
 		// player.destroy();
